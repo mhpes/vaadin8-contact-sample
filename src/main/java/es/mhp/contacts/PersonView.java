@@ -21,15 +21,17 @@ import es.mhp.contacts.backend.Person;
 import es.mhp.contacts.components.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 
 @UIScope
-@SpringView(name = "PersonView")
+@SpringView(name = PersonView.PERSON_VIEW)
 @SuppressWarnings("serial")
 public class PersonView extends HorizontalLayout implements View {
+	public static final String PERSON_VIEW = "PersonView";
 	Grid<Person> grid;
 	PersonEdit editForm;
 
@@ -40,6 +42,16 @@ public class PersonView extends HorizontalLayout implements View {
 	DataProvider<Person, String> dataProvider;
 	ConfigurableFilterDataProvider<Person, Void, String> filterDataProvider;
 
+	public PersonView() {
+		this.setStyleName("view-style");
+	}
+
+	@PostConstruct
+	public void postConstruct() {
+		createLayout();
+		getPresenter().enter();
+		getPresenter().setView(this);
+	}
 
 	protected PersonPresenter getPresenter() {
 		return presenter;
@@ -47,17 +59,7 @@ public class PersonView extends HorizontalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeListener.ViewChangeEvent event) {
-		createLayout();
-		getPresenter().enter();
-		getPresenter().setView(this);
-//		getPresenter().listPersons();
 	}
-
-//	public void listPersons(List<Person> persons) {
-////		LIstDataProvider<Person> dataProvider = new ListDataProvider<persons>();
-//		dataProvider.refreshAll();
-////		grid.setItems(persons);
-//	}
 
 	public void setPerson(Person person) {
 		binder.setBean(person);
@@ -68,10 +70,6 @@ public class PersonView extends HorizontalLayout implements View {
 		}else {
 			editForm.picture.setSource(new ThemeResource("../mytheme/img/user.jpg"));
 		}
-	}
-
-	public PersonView() {
-		this.setStyleName("view-style");
 	}
 
 	private void createLayout() {
@@ -231,11 +229,7 @@ public class PersonView extends HorizontalLayout implements View {
 							cd.removeConfirm();
 						}
 					});
-
-
-
 		});
 	}
-
 
 }

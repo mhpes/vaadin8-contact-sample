@@ -1,24 +1,16 @@
 package es.mhp.contacts;
 
 import com.vaadin.annotations.Theme;
-import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinServlet;
-import com.vaadin.spring.annotation.EnableVaadin;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
-import es.mhp.contacts.backend.DataService;
-import es.mhp.contacts.backend.Person;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.ContextLoaderListener;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.annotation.WebListener;
-import javax.servlet.annotation.WebServlet;
 
 /**
  * This UI is the application entry point. A UI may either represent a browser
@@ -40,39 +32,51 @@ public class ContactsUI extends UI {
 	public static class MyContextLoaderListener extends ContextLoaderListener {
 	}
 
-	private Navigator navigator;
-
-	private HorizontalLayout viewContainer;
+	private Panel viewContainer;
 
 	@Override
 	protected void init(VaadinRequest vaadinRequest) {
 		getPage().setTitle("Contacts");
 		VerticalLayout root = createUILayout();
 
-		navigator = new Navigator(this, viewContainer);
-		navigator.addProvider(viewProvider);
+		setNavigator(new Navigator(this, viewContainer));
+		getNavigator().addProvider(viewProvider);
 		setContent(root);
-		navigator.navigateTo("PersonView");
+		getNavigator().navigateTo("PersonView");
 	}
 
 	private VerticalLayout createUILayout() {
 		VerticalLayout generalLayout = new VerticalLayout();
 		//TITLE
-		Label title = new Label("Contacs");
+		Label title = new Label("Contacts");
 		title.setStyleName(ValoTheme.LABEL_H1);
+		// NAVIGATION
+		Layout menu = createNavigation();
 		//VIEW
-		Layout viewLayout = createView();
-		generalLayout.addComponents(title,viewLayout);
+		Panel viewLayout = createView();
+
+		generalLayout.addComponents(title, menu, viewLayout);
 		generalLayout.setComponentAlignment(title,Alignment.MIDDLE_CENTER);
 		return generalLayout;
 	}
 
-	private Layout createView() {
-		viewContainer = new HorizontalLayout();
+	private Layout createNavigation() {
+		HorizontalLayout menuLayout = new HorizontalLayout();
+		Button personView = new Button("People");
+		personView.addClickListener(e -> getNavigator().navigateTo(PersonView.PERSON_VIEW));
+
+		Button dragAndDropView = new Button("Drag&Drop");
+		dragAndDropView.addClickListener(e -> getNavigator().navigateTo(DragAndDropView.DRAG_AND_DROP_VIEW));
+
+		menuLayout.addComponents(personView, dragAndDropView);
+		return menuLayout;
+	}
+
+	private Panel createView() {
+		viewContainer = new Panel();
 		viewContainer.addStyleName("view-container");
 		viewContainer.setSizeFull();
 		return viewContainer;
 	}
-
 
 }
