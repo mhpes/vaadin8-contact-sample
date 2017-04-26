@@ -119,7 +119,19 @@ public class DragAndDropView extends HorizontalLayout implements View {
 	private void reorderingFieldsLayouts() {
 		VerticalLayout layouts = new VerticalLayout();
 		for(int i = 0; i < 2; i++) {
-			layouts.addComponent(new HorizontalLayout(new TextField(i + "")));
+			TextField field = new TextField(i + "");
+			HorizontalLayout fieldsLayout = new HorizontalLayout(new Label(i + ""), field);
+
+			createDragSource(i, field);
+			DropTargetExtension dropTarget = new DropTargetExtension<>(fieldsLayout);
+			dropTarget.setDropEffect(DropEffect.MOVE);
+			dropTarget.addDropListener(e -> {
+				e.getDragSourceComponent().ifPresent(sourceComponent -> {
+					fieldsLayout.addComponent((Component)sourceComponent);
+				});
+			});
+
+			layouts.addComponent(fieldsLayout);
 		}
 		container.setContent(layouts);
 	}
