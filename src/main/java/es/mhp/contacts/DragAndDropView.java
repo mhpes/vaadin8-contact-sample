@@ -61,43 +61,57 @@ public class DragAndDropView extends HorizontalLayout implements View {
 	private void reorderingLayouts() {
 		VerticalLayout layouts = new VerticalLayout();
 		for(int i = 0; i < new Random().nextInt((10) + 1) + 5; i++) {
-			HorizontalLayout contentContainer = new HorizontalLayout(new Label(i + ""));
-			contentContainer.setSizeFull();
-			int rgb = (int) (Math.random()*(1<<24));
-			String className = "s" + rgb;
-			Page.getCurrent().getStyles().add("." + className + "{ background: #" + Integer.toHexString(rgb) + ";}");
-			contentContainer.addStyleName(className);
-
+			HorizontalLayout contentContainer = createContentContainer(i);
 			createDragSource(i, contentContainer);
-
-			DropTargetExtension dropTarget = new DropTargetExtension<>(contentContainer);
-			dropTarget.setDropEffect(DropEffect.MOVE);
-			dropTarget.addDropListener(e -> {
-				e.getDragSourceComponent().ifPresent(sourceComponent -> {
-					Component targetComponent = dropTarget.getParent();
-					int targetIndex = layouts.getComponentIndex(targetComponent);
-					int sourceIndex = layouts.getComponentIndex((AbstractComponent)sourceComponent);
-
-					layouts.addComponent((AbstractComponent)sourceComponent, targetIndex);
-					layouts.addComponent(targetComponent, sourceIndex);
-				});
-			});
+			createDropTarget(layouts, contentContainer);
 
 			layouts.addComponent(contentContainer);
 		}
 		container.setContent(layouts);
 	}
 
-	private void createDragSource(int i, AbstractComponent container) {
-		DragSourceExtension<AbstractComponent> dragSource = new DragSourceExtension<>(container);
+	private void createDropTarget(VerticalLayout layouts, AbstractComponent component) {
+		DropTargetExtension dropTarget = new DropTargetExtension<>(component);
+		dropTarget.setDropEffect(DropEffect.MOVE);
+		dropTarget.addDropListener(e -> {
+            e.getDragSourceComponent().ifPresent(sourceComponent -> {
+                Component targetComponent = dropTarget.getParent();
+                int targetIndex = layouts.getComponentIndex(targetComponent);
+                int sourceIndex = layouts.getComponentIndex((AbstractComponent)sourceComponent);
+
+                layouts.addComponent((AbstractComponent)sourceComponent, targetIndex);
+                layouts.addComponent(targetComponent, sourceIndex);
+            });
+        });
+	}
+
+	private HorizontalLayout createContentContainer(int i) {
+		HorizontalLayout contentContainer = new HorizontalLayout(new Label(i + ""));
+		contentContainer.setSizeFull();
+		int rgb = (int) (Math.random()*(1<<24));
+		String className = "s" + i;
+		Page.getCurrent().getStyles().add("." + className + "{ background-color: #" + Integer.toHexString(rgb) + ";}");
+		contentContainer.addStyleName(className);
+
+		return contentContainer;
+	}
+
+	private void createDragSource(int i, AbstractComponent component) {
+		DragSourceExtension<AbstractComponent> dragSource = new DragSourceExtension<>(component);
 		dragSource.setEffectAllowed(EffectAllowed.MOVE);
 		dragSource.setDataTransferText("Reordering " + i);
 	}
 
 	private void reorderingFields() {
 		VerticalLayout layouts = new VerticalLayout();
+
 		for(int i = 0; i < new Random().nextInt((10) + 1) + 5; i++) {
-			layouts.addComponent(new TextField(i + ""));
+			TextField textField = new TextField(i + "");
+			textField.addStyleName("s" + i);
+			createDragSource(i, textField);
+			createDropTarget(layouts, textField);
+
+			layouts.addComponent(textField);
 		}
 		container.setContent(layouts);
 	}
